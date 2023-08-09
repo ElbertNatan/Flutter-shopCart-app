@@ -29,36 +29,43 @@ class _GroceryListState extends State<GroceryList> {
   void _loadItems() async {
     final url = Uri.https('flutter-backend-fe30c-default-rtdb.firebaseio.com',
         'shopping-list.json');
-    final response = await http.get(url);
+    try {
+      final response = await http.get(url);
 
-    if (response.statusCode != 200) {
-      setState(() {
-        _error = response.statusCode.toString();
-      });
-    }
-    if (response.body != 'null') {
-      final Map<String, dynamic> jsonResponse = json.decode(response.body);
-      final List<GroceryItem> loadedItems = [];
-      for (final item in jsonResponse.entries) {
-        final category = categories.entries
-            .firstWhere(
-                (element) => element.value.title == item.value['category'])
-            .value;
-
-        loadedItems.add(GroceryItem(
-            id: item.key,
-            name: item.value['name'],
-            quantity: item.value['quantity'],
-            category: category));
+      if (response.statusCode >= 400) {
+        setState(() {
+          _error = response.statusCode.toString();
+        });
       }
+      if (response.body != 'null') {
+        final Map<String, dynamic> jsonResponse = json.decode(response.body);
+        final List<GroceryItem> loadedItems = [];
+        for (final item in jsonResponse.entries) {
+          final category = categories.entries
+              .firstWhere(
+                  (element) => element.value.title == item.value['category'])
+              .value;
 
+          loadedItems.add(GroceryItem(
+              id: item.key,
+              name: item.value['name'],
+              quantity: item.value['quantity'],
+              category: category));
+        }
+
+        setState(() {
+          _groceryItems = loadedItems;
+        });
+      }
       setState(() {
-        _groceryItems = loadedItems;
+        _isLoading = false;
+      });
+    } catch (error) {
+      setState(() {
+        _error = "Um erro ocorreu";
+        _isLoading = false;
       });
     }
-    setState(() {
-      _isLoading = false;
-    });
   }
 
   void _addItem() async {
