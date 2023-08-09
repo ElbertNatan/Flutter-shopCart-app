@@ -22,6 +22,7 @@ class _NewItemState extends State<NewItem> {
   var _selectedCategory = categories[Categories.vegetables]!;
   var _isSending = false;
 
+
   void _saveItem() async {
     _formKey.currentState!.validate();
     _formKey.currentState!.save();

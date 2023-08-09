@@ -18,6 +18,8 @@ class _GroceryListState extends State<GroceryList> {
   List<GroceryItem> _groceryItems = [];
   var _isLoading = true;
 
+  String? _error;
+
   @override
   void initState() {
     super.initState();
@@ -29,8 +31,13 @@ class _GroceryListState extends State<GroceryList> {
         'shopping-list.json');
     final response = await http.get(url);
 
-    final Map<String, dynamic> jsonResponse =
-        json.decode(response.body);
+    if (response.statusCode != 200) {
+      setState(() {
+        _error = response.statusCode.toString();
+      });
+    }
+
+    final Map<String, dynamic> jsonResponse = json.decode(response.body);
     final List<GroceryItem> loadedItems = [];
     for (final item in jsonResponse.entries) {
       final category = categories.entries
@@ -54,7 +61,9 @@ class _GroceryListState extends State<GroceryList> {
     final newItem = await Navigator.of(context).push<GroceryItem>(
         MaterialPageRoute(builder: (ctx) => const NewItem()));
 
-    if(newItem == null){return;}
+    if (newItem == null) {
+      return;
+    }
     setState(() {
       _groceryItems.add(newItem);
     });
@@ -72,8 +81,16 @@ class _GroceryListState extends State<GroceryList> {
       child: Text("No items added"),
     );
 
-    if(_isLoading){
-      content = const Center(child: CircularProgressIndicator(),);
+    if (_isLoading) {
+      content = const Center(
+        child: CircularProgressIndicator(),
+      );
+    }
+
+    if (_error != null) {
+      content = const Center(
+        child: Text("Error fetching data from data base."),
+      );
     }
 
     if (_groceryItems.isNotEmpty) {
