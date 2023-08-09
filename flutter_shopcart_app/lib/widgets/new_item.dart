@@ -45,15 +45,13 @@ class _NewItemState extends State<NewItem> {
     if (!context.mounted) {
       return;
     }
-    print(response.body);
-    print(response.statusCode);
-    Navigator.of(context).pop();
-    //replace above with below in case of no firebase
-    /*Navigator.of(context).pop(GroceryItem(
-        id: DateTime.now().toString(),
+
+    final Map<String, dynamic> resData = json.decode(response.body);
+    Navigator.of(context).pop(GroceryItem(
+        id: resData['name'],
         name: _enteredName,
         quantity: _enteredQuantity,
-        category: _selectedCategory));*/
+        category: _selectedCategory));
   }
 
   @override
