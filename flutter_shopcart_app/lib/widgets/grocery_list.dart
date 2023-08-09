@@ -36,23 +36,27 @@ class _GroceryListState extends State<GroceryList> {
         _error = response.statusCode.toString();
       });
     }
+    if (response.body != 'null') {
+      final Map<String, dynamic> jsonResponse = json.decode(response.body);
+      final List<GroceryItem> loadedItems = [];
+      for (final item in jsonResponse.entries) {
+        final category = categories.entries
+            .firstWhere(
+                (element) => element.value.title == item.value['category'])
+            .value;
 
-    final Map<String, dynamic> jsonResponse = json.decode(response.body);
-    final List<GroceryItem> loadedItems = [];
-    for (final item in jsonResponse.entries) {
-      final category = categories.entries
-          .firstWhere(
-              (element) => element.value.title == item.value['category'])
-          .value;
+        loadedItems.add(GroceryItem(
+            id: item.key,
+            name: item.value['name'],
+            quantity: item.value['quantity'],
+            category: category));
+      }
 
-      loadedItems.add(GroceryItem(
-          id: item.key,
-          name: item.value['name'],
-          quantity: item.value['quantity'],
-          category: category));
+      setState(() {
+        _groceryItems = loadedItems;
+      });
     }
     setState(() {
-      _groceryItems = loadedItems;
       _isLoading = false;
     });
   }
